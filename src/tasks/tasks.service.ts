@@ -18,8 +18,34 @@ export class TasksService {
     return newTask;
   }
 
-  findAll(): Promise<Task[]> {
-    return Promise.resolve(this.tasks);
+  findAll(filter?: {
+    title?: string;
+    description?: string;
+    completed?: boolean;
+  }): Promise<Task[]> {
+    let filteredTasks = this.tasks;
+
+    if (filter) {
+      const { title, description, completed } = filter;
+
+      if (title) {
+        filteredTasks = filteredTasks.filter((task) =>
+          task.title.toLowerCase().includes(title.toLowerCase()),
+        );
+      }
+
+      if (description) {
+        filteredTasks = filteredTasks.filter((task) =>
+          task.description.toLowerCase().includes(description.toLowerCase()),
+        );
+      }
+
+      if (completed !== undefined) {
+        filteredTasks = filteredTasks.filter((task) => task.completed === completed);
+      }
+    }
+
+    return Promise.resolve(filteredTasks);
   }
 
   findOne(id: number): Task {

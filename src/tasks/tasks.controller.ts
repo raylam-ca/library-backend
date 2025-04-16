@@ -1,4 +1,5 @@
 import {
+  Query,
   Body,
   Controller,
   Get,
@@ -13,6 +14,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -43,11 +45,38 @@ export class TasksController {
   @Get()
   @ApiOperation({
     summary: 'Get all tasks',
-    description: 'Retrieves a list of all existing tasks.'
+    description: 'Retrieves a list of all existing tasks. You can filter by title, description, and completed status.',
   })
-  @ApiResponse({ status: 200, description: 'List of tasks retrieved successfully.', type: [CreateTaskDto] })
-  async findAll(): Promise<Task[]> {
-    return this.tasksService.findAll();
+  @ApiQuery({
+    name: 'title',
+    required: false,
+    type: String,
+    description: 'Filter tasks by title (partial match allowed)',
+  })
+  @ApiQuery({
+    name: 'description',
+    required: false,
+    type: String,
+    description: 'Filter tasks by description (partial match allowed)',
+  })
+  @ApiQuery({
+    name: 'completed',
+    required: false,
+    type: Boolean,
+    description: 'Filter tasks by completion status (true or false)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of tasks retrieved successfully.',
+    type: [CreateTaskDto],
+  })
+  async findAll(
+    @Query('title') title?: string,
+    @Query('description') description?: string,
+    @Query('completed') completed?: string,
+  ): Promise<Task[]> {
+    const isCompleted = completed !== undefined ? completed === 'true' : undefined;
+    return this.tasksService.findAll({ title, description, completed: isCompleted });
   }
 
   @Get(':id')
