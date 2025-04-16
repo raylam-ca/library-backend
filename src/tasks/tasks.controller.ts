@@ -1,5 +1,20 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { ParseIntPipe } from '../common/pipes/parse-int.pipe';
@@ -8,13 +23,17 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { Task } from './interfaces/task.interface';
 
 @UseGuards(RolesGuard)
+@ApiTags('Tasks')
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
   @Roles(['admin'])
-  @ApiOperation({ summary: 'Create a new task', description: 'Only users with the "admin" role can create tasks.' })
+  @ApiOperation({
+    summary: 'Create a new task',
+    description: 'Only users with the "admin" role can create tasks.'
+  })
   @ApiResponse({ status: 201, description: 'The task has been successfully created.' })
   @ApiResponse({ status: 403, description: 'Forbidden. Only admin users can create tasks.' })
   async create(@Body() createTaskDto: CreateTaskDto) {
@@ -22,22 +41,54 @@ export class TasksController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all tasks', description: 'Retrieves a list of all existing tasks.' })
+  @ApiOperation({
+    summary: 'Get all tasks',
+    description: 'Retrieves a list of all existing tasks.'
+  })
   @ApiResponse({ status: 200, description: 'List of tasks retrieved successfully.', type: [CreateTaskDto] })
   async findAll(): Promise<Task[]> {
     return this.tasksService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a single task by ID', description: 'Retrieve a specific task using its unique identifier.' })
+  @ApiOperation({
+    summary: 'Get a single task by ID',
+    description: 'Retrieve a specific task using its unique identifier.'
+  })
   @ApiParam({ name: 'id', type: Number, description: 'ID of the task to retrieve' })
   @ApiResponse({ status: 200, description: 'Task retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Task not found.' })
-  findOne(
-    @Param('id', new ParseIntPipe())
-    id: number,
+  findOne(@Param('id', new ParseIntPipe()) id: number) {
+    return this.tasksService.findOne(id);
+  }
+
+  @Put(':id')
+  @Roles(['admin'])
+  @ApiOperation({
+    summary: 'Update an existing task by ID',
+    description: 'Only users with the "admin" role can update tasks. Provide the task ID and updated details.',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID of the task to update' })
+  @ApiBody({ type: CreateTaskDto })
+  @ApiResponse({ status: 200, description: 'The task has been successfully updated.' })
+  @ApiResponse({ status: 404, description: 'Task not found.' })
+  update(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Body() updateTaskDto: CreateTaskDto,
   ) {
-    // Retrieve a Task instance by ID
-    console.log(id);
+    return this.tasksService.update(id, updateTaskDto);
+  }
+
+  @Delete(':id')
+  @Roles(['admin'])
+  @ApiOperation({
+    summary: 'Delete a task by ID',
+    description: 'Only users with the "admin" role can delete tasks. Provide the task ID to remove it from the system.',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID of the task to delete' })
+  @ApiResponse({ status: 200, description: 'The task has been successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Task not found.' })
+  delete(@Param('id', new ParseIntPipe()) id: number) {
+    return this.tasksService.delete(id);
   }
 }
