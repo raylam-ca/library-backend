@@ -29,7 +29,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  @Roles(['admin'])
+  //@Roles(['admin'])
   @ApiOperation({
     summary: 'Create a new task',
     description: 'Only users with the "admin" role can create tasks.'
@@ -63,7 +63,7 @@ export class TasksController {
   }
 
   @Put(':id')
-  @Roles(['admin'])
+  //@Roles(['admin'])
   @ApiOperation({
     summary: 'Update an existing task by ID',
     description: 'Only users with the "admin" role can update tasks. Provide the task ID and updated details.',
@@ -80,7 +80,7 @@ export class TasksController {
   }
 
   @Delete(':id')
-  @Roles(['admin'])
+  //@Roles(['admin'])
   @ApiOperation({
     summary: 'Delete a task by ID',
     description: 'Only users with the "admin" role can delete tasks. Provide the task ID to remove it from the system.',
